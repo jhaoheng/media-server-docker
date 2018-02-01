@@ -1,0 +1,39 @@
+version: "3.2"
+services:
+  ossrs:
+    image: quay.io/orbweb/srs-2.0-fixed:latest
+    ports:
+      - 1985:1985/tcp # http api
+      - 8080:8080/tcp # http server
+      - 1935:1935/tcp # rtmp server
+    tty: true
+    working_dir: /opt/srs/trunk
+    container_name: ossrs
+    depends_on:
+      - remote_syslog
+    volumes:
+      - ./srs.conf:/opt/srs/trunk/conf/srs.conf
+      - log-volume:/opt/srs/trunk/log # Notice : srs.conf -> srs_log_file path
+    command: ./objs/srs -c ./conf/srs.conf
+    networks: 
+      - default
+
+  # remote_syslog:
+  #   image: octohost/remote_syslog:latest
+  #   container_name: remote_syslog
+  #   volumes:
+  #     - log-volume:/syslog
+  #   command: /usr/local/bin/remote_syslog -D --hostname ossrs-dev -p 46888 -d logs3.papertrailapp.com /syslog/srs.log
+  #   tty: true
+  #   restart: always
+  #   networks: 
+  #     - default
+
+volumes:
+  log-volume:
+
+networks:
+  default:
+    driver: bridge
+
+

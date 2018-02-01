@@ -1,0 +1,51 @@
+version: "3.2"
+services:
+  # proxy-rtmpt:
+  #   image: nginx:latest
+  #   container_name: proxy-rtmpt
+  #   ports:
+  #     - 180:80/tcp
+  #     - 1443:443/tcp
+  #   environment:
+  #     - upstream=ossrs
+  #   volumes:
+  #     - ./nginx/ngx_rtmpt_proxy_module.so:/etc/nginx/modules/ngx_rtmpt_proxy_module.so
+  #     - ./nginx/ssl:/etc/nginx/ssl
+  #     - ./nginx/proxy-rtmpt.conf:/etc/nginx/nginx.conf
+  #   command: [nginx, '-g', 'daemon off;'] 
+  #   networks: 
+  #     - default
+
+  proxy-rtmps:
+    image: nginx:1.13.6 
+    container_name: proxy-rtmps
+    ports:
+      - 443:443/tcp
+    volumes:
+      - ./nginx/lib/ngx_rtmp_module.so:/etc/nginx/modules/ngx_rtmp_module.so
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/proxy/proxy-rtmps.conf:/etc/nginx/nginx.conf
+      # - ./nginx/test.conf:/etc/nginx/nginx.conf
+    command: [nginx, '-g', 'daemon off;'] 
+    networks: 
+      - default
+
+  # 測試 nginx rtmp media server 
+  nginx-rtmp:
+    image: nginx:1.13.6 
+    container_name: media-server
+    ports:
+      - 1935:1935/tcp
+    tty: true
+    volumes:
+      - ./nginx/lib/ngx_rtmp_module.so:/etc/nginx/modules/ngx_rtmp_module.so
+      - ./nginx/nginx-rtmp.conf:/etc/nginx/nginx.conf
+    command: [nginx, '-g', 'daemon off;']
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
+
+

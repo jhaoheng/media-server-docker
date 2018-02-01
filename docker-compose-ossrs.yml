@@ -1,0 +1,53 @@
+version: "3.2"
+services:
+  ossrs:
+    build: 
+      context: ./srs
+    image: ossrs
+    ports:
+      - 1985:1985/tcp # http api
+      - 8080:8080/tcp # http server
+      - 1935:1935/tcp # rtmp server
+    tty: true
+    working_dir: /opt/srs/trunk
+    container_name: media-server
+    volumes:
+      - ./srs/srs.conf:/opt/srs/trunk/conf/srs.conf
+    command: ./objs/srs -c ./conf/srs.conf
+    networks: 
+      - default
+
+  proxy-rtmps:
+    image: nginx:1.13.6 
+    container_name: proxy-rtmps
+    ports:
+      - 443:443/tcp
+    volumes:
+      - ./nginx/lib/ngx_rtmp_module.so:/etc/nginx/modules/ngx_rtmp_module.so
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/proxy/proxy-rtmps.conf:/etc/nginx/nginx.conf
+    command: [nginx, '-g', 'daemon off;'] 
+    networks: 
+      - default
+
+  # proxy-rtmpt:
+  #   image: nginx:latest
+  #   container_name: proxy-rtmpt
+  #   ports:
+  #     - 180:80/tcp
+  #     - 1443:443/tcp
+  #   environment:
+  #     - upstream=ossrs
+  #   volumes:
+  #     - ./nginx/ngx_rtmpt_proxy_module.so:/etc/nginx/modules/ngx_rtmpt_proxy_module.so
+  #     - ./nginx/ssl:/etc/nginx/ssl
+  #     - ./nginx/proxy-rtmpt.conf:/etc/nginx/nginx.conf
+  #   command: [nginx, '-g', 'daemon off;'] 
+  #   networks: 
+  #     - default
+
+networks:
+  default:
+    driver: bridge
+
+
